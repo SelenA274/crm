@@ -33,30 +33,36 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 min-h-screen border-r flex flex-col">
-      <div className="p-6 border-b">
-        <h1 className="text-xl font-bold">Admin CRM</h1>
+    <aside className="w-64 min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="p-8 border-b border-white/10">
+        <p className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase mb-1">Admin</p>
+        <h1 className="font-serif text-2xl text-white tracking-wide">VELO</h1>
       </div>
-      <nav className="flex-1 p-4 flex flex-col gap-1">
-        {links.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${
-              pathname === href ? "bg-black text-white" : "hover:bg-gray-100"
-            }`}
-          >
-            <Icon size={18} />
-            {label}
-          </Link>
-        ))}
+      <nav className="flex-1 p-4 flex flex-col gap-1 mt-2">
+        {links.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition text-sm ${
+                active
+                  ? "bg-[#c9a96e] text-white font-medium"
+                  : "text-gray-400 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Icon size={17} />
+              {label}
+            </Link>
+          )
+        })}
       </nav>
-      <div className="p-4 border-t">
+      <div className="p-6 border-t border-white/10 mb-2">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 w-full text-red-500"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 w-full text-gray-400 hover:text-red-400 transition text-sm"
         >
-          <LogOut size={18} />
+          <LogOut size={17} />
           Logout
         </button>
       </div>

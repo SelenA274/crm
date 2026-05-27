@@ -34,20 +34,17 @@ export default function Verify2FAForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <input
-        placeholder="Enter 2FA code"
+        placeholder="6-digit code"
         value={code}
         onChange={(e) => setCode(e.target.value)}
-        className="border p-2 rounded"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-sans"
+        maxLength={6}
         required
       />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-black text-white p-2 rounded hover:bg-gray-800 disabled:opacity-50"
-      >
-        {loading ? "Verifying..." : "Verify"}
+      <button type="submit" disabled={loading} className="mt-2 bg-[#1a1a1a] text-white py-3.5 rounded-full hover:bg-[#c9a96e] transition text-sm font-medium tracking-wider disabled:opacity-50">
+        {loading ? "Verifying..." : "VERIFY"}
       </button>
     </form>
   )

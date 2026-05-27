@@ -29,9 +29,7 @@ export default function UsersPage() {
       await api.delete(`/users/${id}`, config)
       setUsers(users.filter((u) => u._id !== id))
       toast.success("User deleted")
-    } catch {
-      toast.error("Failed to delete user")
-    }
+    } catch { toast.error("Failed to delete user") }
   }
 
   const handleRoleUpdate = async (id: string, role: string) => {
@@ -39,46 +37,44 @@ export default function UsersPage() {
       await api.put(`/users/${id}/role`, { role }, config)
       setUsers(users.map((u) => u._id === id ? { ...u, role } : u))
       toast.success("Role updated")
-    } catch {
-      toast.error("Failed to update role")
-    }
+    } catch { toast.error("Failed to update role") }
   }
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>
+  if (loading) return <main className="px-8 py-10"><p className="text-gray-400">Loading...</p></main>
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Users</h1>
-      <div className="border rounded-lg overflow-hidden">
+    <main className="px-8 py-10">
+      <div className="mb-10">
+        <p className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase mb-2">Manage</p>
+        <h1 className="font-serif text-4xl text-gray-900">Users</h1>
+      </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left p-4 text-sm font-semibold">Name</th>
-              <th className="text-left p-4 text-sm font-semibold">Email</th>
-              <th className="text-left p-4 text-sm font-semibold">Role</th>
-              <th className="text-left p-4 text-sm font-semibold">Actions</th>
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left px-6 py-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Name</th>
+              <th className="text-left px-6 py-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Email</th>
+              <th className="text-left px-6 py-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Role</th>
+              <th className="text-left px-6 py-4 text-xs text-gray-400 uppercase tracking-wider font-medium"></th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user._id} className="border-t">
-                <td className="p-4">{user.name}</td>
-                <td className="p-4">{user.email}</td>
-                <td className="p-4">
+            {users.map((user, i) => (
+              <tr key={user._id} className={`border-b border-gray-50 hover:bg-[#faf7f4] transition ${i === users.length - 1 ? "border-0" : ""}`}>
+                <td className="px-6 py-4 font-medium text-gray-900 text-sm">{user.name}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
+                <td className="px-6 py-4">
                   <select
                     value={user.role}
                     onChange={(e) => handleRoleUpdate(user._id, e.target.value)}
-                    className="border p-1 rounded text-sm"
+                    className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-[#c9a96e] transition"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td className="p-4">
-                  <button
-                    onClick={() => handleDelete(user._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
+                <td className="px-6 py-4">
+                  <button onClick={() => handleDelete(user._id)} className="text-gray-300 hover:text-red-400 transition">
                     <Trash2 size={16} />
                   </button>
                 </td>

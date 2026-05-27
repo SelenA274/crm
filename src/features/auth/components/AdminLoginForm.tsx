@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { authService } from "../authService"
 import { toast } from "react-toastify"
 
+const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#c9a96e] transition placeholder:text-gray-300"
+
 export default function AdminLoginForm() {
   const router = useRouter()
   const [form, setForm] = useState({ email: "", password: "" })
@@ -29,31 +31,11 @@ export default function AdminLoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
-      <input
-        name="email"
-        type="email"
-        placeholder="Admin Email"
-        value={form.email}
-        onChange={handleChange}
-        className="border p-2 rounded"
-        required
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-        className="border p-2 rounded"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-black text-white p-2 rounded hover:bg-gray-800 disabled:opacity-50"
-      >
-        {loading ? "Loading..." : "Login"}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <input name="email" type="email" placeholder="Admin email" value={form.email} onChange={handleChange} className={inputClass} required />
+      <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} className={inputClass} required />
+      <button type="submit" disabled={loading} className="mt-2 bg-[#1a1a1a] text-white py-3.5 rounded-full hover:bg-[#c9a96e] transition text-sm font-medium tracking-wider disabled:opacity-50">
+        {loading ? "Verifying..." : "SIGN IN"}
       </button>
     </form>
   )
