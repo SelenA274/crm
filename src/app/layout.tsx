@@ -15,7 +15,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isAuthPage = pathname === "/login" || pathname === "/verify-2fa"
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/verify-2fa" ||
+    pathname === "/forgot-password" ||
+    pathname?.startsWith("/reset-password")
 
   return (
     <div className="flex min-h-screen">
