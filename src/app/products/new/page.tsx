@@ -19,13 +19,11 @@ import {
 const inputClass =
   "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-[#c9a96e] transition placeholder:text-gray-300"
 
-const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800"
-
 export default function NewProductPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [image, setImage] = useState<File | null>(null)
+  const [images, setImages] = useState<File[]>([])
   const [form, setForm] = useState({
     name: "",
     brand: "",
@@ -36,8 +34,6 @@ export default function NewProductPage() {
     mainImage: "",
   })
   const [variants, setVariants] = useState<ProductVariant[]>([createEmptyVariant("size")])
-
-  const token = typeof window !== "undefined" ? localStorage.getItem("crm_token") : null
 
   const variantKind = useMemo(
     () => (form.subcategory ? getVariantKind(form.subcategory) : "size"),
@@ -71,40 +67,54 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const mainImage = form.mainImage.trim() || (image ? PLACEHOLDER_IMAGE : "")
-    if (!mainImage) {
-      toast.error("Main image URL is required")
+    const mainImage = form.mainImage.trim()
+
+    if (!mainImage && images.length === 0) {
+      toast.error("Main image is required")
       return
     }
 
     setLoading(true)
     try {
-      const payload = {
-        name: form.name,
-        brand: form.brand,
-        description: form.description,
-        price: Number(form.price),
-        department: form.department,
-        subcategory: form.subcategory,
-        mainImage,
-        variantKind,
-        variants: variants.map(({ _id, ...v }) => v),
-        isActive: true,
+      const cleanVariants = variants.map(({ _id, ...v }) => v)
+
+      if (images.length > 0) {
+        const formData = new FormData()
+        formData.append("name", form.name)
+        formData.append("brand", form.brand)
+        formData.append("description", form.description)
+        formData.append("price", String(Number(form.price)))
+        formData.append("department", form.department)
+        formData.append("subcategory", form.subcategory)
+        formData.append("variantKind", variantKind)
+        formData.append("variants", JSON.stringify(cleanVariants))
+        formData.append("isActive", "true")
+        if (mainImage) formData.append("mainImage", mainImage)
+
+        // الصورة الأولى = mainImage، الباقي = images إضافية
+        formData.append("image", images[0], images[0].name)
+        images.slice(1).forEach((img) => {
+          formData.append("images", img, img.name)
+        })
+
+        await api.post("/product", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+      } else {
+        await api.post("/product", {
+          name: form.name,
+          brand: form.brand,
+          description: form.description,
+          price: Number(form.price),
+          department: form.department,
+          subcategory: form.subcategory,
+          mainImage,
+          variantKind,
+          variants: cleanVariants,
+          isActive: true,
+        })
       }
 
-      const formData = new FormData()
-      Object.entries(payload).forEach(([key, value]) => {
-        if (key === "variants") {
-          formData.append(key, JSON.stringify(value))
-        } else {
-          formData.append(key, String(value))
-        }
-      })
-      if (image) formData.append("image", image)
-
-      await api.post("/product", formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-      })
       toast.success("Product created!")
       router.push("/products")
     } catch (err: any) {
@@ -205,22 +215,28 @@ export default function NewProductPage() {
           <input
             name="mainImage"
             type="url"
-            placeholder="Main image URL"
+            placeholder="Main image URL (optional if uploading file)"
             value={form.mainImage}
             onChange={handleChange}
             className={inputClass}
           />
-          <p className="text-xs text-gray-400 -mt-2">
-            Required for validation. File upload below overrides the stored URL.
-          </p>
 
           <div className="border border-dashed border-gray-200 rounded-xl px-4 py-3">
+            <label className="text-xs text-gray-400 mb-2 block">
+              Upload images (first = main image)
+            </label>
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0] || null)}
+              multiple
+              onChange={(e) => setImages(Array.from(e.target.files || []))}
               className="text-sm text-gray-500 w-full"
             />
+            {images.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">
+                {images.length} file{images.length > 1 ? "s" : ""} selected
+              </p>
+            )}
           </div>
 
           {form.subcategory && (
