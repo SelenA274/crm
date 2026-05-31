@@ -91,7 +91,6 @@ export default function NewProductPage() {
         formData.append("isActive", "true")
         if (mainImage) formData.append("mainImage", mainImage)
 
-        // الصورة الأولى = mainImage، الباقي = images إضافية
         formData.append("image", images[0], images[0].name)
         images.slice(1).forEach((img) => {
           formData.append("images", img, img.name)

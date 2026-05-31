@@ -141,7 +141,6 @@ export default function DashboardPage() {
   return (
     <main className="px-8 py-10 space-y-8">
 
-      {/* Header */}
       <div className="flex justify-between items-end">
         <div>
           <p className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase mb-2">Overview</p>
@@ -166,7 +165,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Low Stock Alert */}
       {lowStock.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-6 py-4 flex flex-col gap-2">
           <div className="flex items-center gap-2 text-amber-700 font-medium text-sm">
@@ -184,7 +182,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map(({ key, label, icon: Icon, color, href }) => (
           <Link key={key} href={href}
@@ -204,10 +201,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Chart + Activity Log — two columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Revenue Chart — 2/3 */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="mb-6 flex justify-between items-end">
             <div>
@@ -242,7 +237,6 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Activity Log — 1/3 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
           <div className="mb-5">
             <p className="text-[#c9a96e] text-xs tracking-[0.3em] uppercase mb-1">Live</p>
@@ -261,7 +255,6 @@ export default function DashboardPage() {
                     key={item.id + item.type}
                     className={`flex gap-3 p-3 rounded-xl transition ${isStock ? "bg-amber-50" : "hover:bg-[#faf7f4]"}`}
                   >
-                    {/* Icon */}
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
                       isStock ? "bg-amber-100 text-amber-500"
                       : isUser ? "bg-[#fde8ed] text-[#c97a8f]"
@@ -271,7 +264,7 @@ export default function DashboardPage() {
                        : isUser ? <UserPlus size={14} />
                        : <ShoppingCart size={14} />}
                     </div>
-                    {/* Text */}
+
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs leading-relaxed ${isStock ? "text-amber-700 font-medium" : "text-gray-600"}`}>
                         {item.text}
@@ -286,7 +279,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Orders */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-8 py-6 border-b border-gray-50 flex justify-between items-end">
           <div>

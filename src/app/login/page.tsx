@@ -53,7 +53,6 @@ export default function LoginPage() {
         .eye-btn:hover { color: #c9a96e !important; }
       `}</style>
 
-      {/* Decorative circles */}
       <div style={{ position: "absolute", top: "-80px", right: "-80px", width: "420px", height: "420px", borderRadius: "50%", background: "radial-gradient(circle, rgba(201,169,110,0.18) 0%, transparent 70%)", filter: "blur(40px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "-100px", left: "-100px", width: "520px", height: "520px", borderRadius: "50%", background: "radial-gradient(circle, rgba(201,169,110,0.12) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", top: "40%", left: "60%", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(239,213,170,0.15) 0%, transparent 70%)", filter: "blur(50px)", pointerEvents: "none" }} />
@@ -72,7 +71,6 @@ export default function LoginPage() {
         position: "relative" as const,
       }}>
 
-        {/* Header */}
         <div style={{ marginBottom: "40px", textAlign: "center" as const }}>
           <p style={{
             fontSize: "0.7rem", letterSpacing: "0.35em", textTransform: "uppercase" as const,
@@ -92,10 +90,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" as const, gap: "14px" }}>
 
-          {/* Email */}
+
           <div style={{ position: "relative" as const }}>
             <Mail size={15} color={focusedField === "email" ? "#c9a96e" : "#c8b99a"}
               style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", transition: "color 0.2s", pointerEvents: "none" }} />
@@ -119,7 +116,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
+
           <div style={{ position: "relative" as const }}>
             <Lock size={15} color={focusedField === "password" ? "#c9a96e" : "#c8b99a"}
               style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", transition: "color 0.2s", pointerEvents: "none" }} />
@@ -157,7 +154,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Button */}
+
           <button
             type="submit"
             disabled={loading}
@@ -176,7 +173,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Forgot password */}
         <div style={{ textAlign: "center" as const, marginTop: "24px" }}>
           <a href="/forgot-password" style={{
             fontSize: "0.82rem", color: "#c9a96e", textDecoration: "none",
