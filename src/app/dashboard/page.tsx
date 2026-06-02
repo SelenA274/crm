@@ -13,25 +13,25 @@ import {
 } from "recharts"
 
 const statCards = [
-  { key: "totalOrders",   label: "Total Orders",   icon: ShoppingBag, color: "bg-[#fde8ed] text-[#c97a8f]", href: "/orders" },
-  { key: "totalUsers",    label: "Total Users",    icon: Users,       color: "bg-[#faf0e6] text-[#c9a96e]", href: "/users" },
-  { key: "totalProducts", label: "Total Products", icon: Package,     color: "bg-[#f0f4ff] text-[#7a8fc9]", href: "/products" },
-  { key: "totalRevenue",  label: "Total Revenue",  icon: DollarSign,  color: "bg-[#f0faf4] text-[#5a9c7a]", href: "/orders" },
+  { key: "totalOrders", label: "Total Orders", icon: ShoppingBag, color: "bg-[#fde8ed] text-[#c97a8f]", href: "/orders" },
+  { key: "totalUsers", label: "Total Users", icon: Users, color: "bg-[#faf0e6] text-[#c9a96e]", href: "/users" },
+  { key: "totalProducts", label: "Total Products", icon: Package, color: "bg-[#f0f4ff] text-[#7a8fc9]", href: "/products" },
+  { key: "totalRevenue", label: "Total Revenue", icon: DollarSign, color: "bg-[#f0faf4] text-[#5a9c7a]", href: "/orders" },
 ]
 
 const statusColors: Record<string, string> = {
-  pending:    "bg-yellow-50 text-yellow-600",
+  pending: "bg-yellow-50 text-yellow-600",
   processing: "bg-blue-50 text-blue-600",
-  shipped:    "bg-purple-50 text-purple-600",
-  delivered:  "bg-green-50 text-green-600",
-  cancelled:  "bg-red-50 text-red-400",
+  shipped: "bg-purple-50 text-purple-600",
+  delivered: "bg-green-50 text-green-600",
+  cancelled: "bg-red-50 text-red-400",
 }
 
 type TimeFilter = "today" | "week" | "month"
 
 function timeAgo(date: string) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-  if (diff < 60)   return `${diff}s ago`
+  if (diff < 60) return `${diff}s ago`
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   return `${Math.floor(diff / 86400)}d ago`
@@ -42,7 +42,7 @@ function filterOrders(orders: any[], filter: TimeFilter) {
   return orders.filter((o) => {
     const d = new Date(o.createdAt)
     if (filter === "today") return d.toDateString() === now.toDateString()
-    if (filter === "week")  { const w = new Date(); w.setDate(now.getDate() - 7);  return d >= w }
+    if (filter === "week") { const w = new Date(); w.setDate(now.getDate() - 7); return d >= w }
     if (filter === "month") { const m = new Date(); m.setMonth(now.getMonth() - 1); return d >= m }
     return true
   })
@@ -84,7 +84,18 @@ function buildActivityLog(orders: any[], users: any[], lowStock: any[]) {
   })
 
   lowStock.forEach((p) => {
-    activities.push({ id: p._id, type: "stock", text: `"${p.name}" is running low (${p.totalStock} left)`, date: new Date().toISOString() })
+    const stock =
+      p.variants?.reduce(
+        (sum: number, v: any) => sum + (v.stock || 0),
+        0
+      ) ?? 0
+  
+    activities.push({
+      id: p._id,
+      type: "stock",
+      text: `"${p.name}" is running low (${stock} left)`,
+      date: new Date().toISOString(),
+    })
   })
 
   return activities
@@ -96,11 +107,11 @@ function buildActivityLog(orders: any[], users: any[], lowStock: any[]) {
 export default function DashboardPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth)
   const router = useRouter()
-  const [allOrders,   setAllOrders]   = useState<any[]>([])
+  const [allOrders, setAllOrders] = useState<any[]>([])
   const [allProducts, setAllProducts] = useState<any[]>([])
-  const [allUsers,    setAllUsers]    = useState<any[]>([])
-  const [filter,      setFilter]      = useState<TimeFilter>("week")
-  const [lowStock,    setLowStock]    = useState<any[]>([])
+  const [allUsers, setAllUsers] = useState<any[]>([])
+  const [filter, setFilter] = useState<TimeFilter>("week")
+  const [lowStock, setLowStock] = useState<any[]>([])
 
   useEffect(() => {
     if (!isAuthenticated) { router.push("/login"); return }
@@ -109,31 +120,41 @@ export default function DashboardPage() {
       const config = { headers: { Authorization: `Bearer ${token}` } }
       try {
         const [oR, uR, pR] = await Promise.all([
-          api.get("/order",   config),
-          api.get("/users",   config),
-          api.get("/product", config),
+          api.get("/order", config),
+          api.get("/users", config),
+          api.get("/product?page=1", config)
         ])
-        const orders   = oR.data.data || []
-        const users    = uR.data.data || []
+        const orders = oR.data.data || []
+        const users = uR.data.data || []
         const products = pR.data.data || pR.data || []
         setAllOrders(orders); setAllUsers(users); setAllProducts(products)
-        setLowStock(products.filter((p: any) => (p.totalStock ?? 0) < 3))
+        setLowStock(
+          products.filter((p: any) => {
+            const stock =
+              p.variants?.reduce(
+                (sum: number, v: any) => sum + (v.stock || 0),
+                0
+              ) ?? 0
+
+            return stock < 3
+          })
+        )
       } catch { toast.error("Failed to load stats") }
     }
     fetch()
   }, [isAuthenticated, router])
 
-  const filtered    = filterOrders(allOrders, filter)
-  const revenue     = filtered.reduce((s: number, o: any) => s + (o.totalPrice || 0), 0)
+  const filtered = filterOrders(allOrders, filter)
+  const revenue = filtered.reduce((s: number, o: any) => s + (o.totalPrice || 0), 0)
   const revenueData = generateRevenueData(filtered, filter)
   const recentOrders = [...allOrders].reverse().slice(0, 5)
-  const activityLog  = buildActivityLog(allOrders, allUsers, lowStock)
+  const activityLog = buildActivityLog(allOrders, allUsers, lowStock)
 
   const stats = {
-    totalOrders:   filtered.length,
-    totalUsers:    allUsers.length,
+    totalOrders: filtered.length,
+    totalUsers: allUsers.length,
     totalProducts: allProducts.length,
-    totalRevenue:  revenue,
+    totalRevenue: revenue,
   }
 
   const filterLabels: Record<TimeFilter, string> = { today: "Today", week: "This Week", month: "This Month" }
@@ -175,7 +196,12 @@ export default function DashboardPage() {
             {lowStock.map((p: any) => (
               <Link key={p._id} href="/products"
                 className="text-xs bg-white border border-amber-200 text-amber-600 px-3 py-1 rounded-full hover:border-amber-400 transition">
-                {p.name} — {p.totalStock} left
+                {p.name} — {
+                  p.variants?.reduce(
+                    (sum: number, v: any) => sum + (v.stock || 0),
+                    0
+                  ) ?? 0
+                } left
               </Link>
             ))}
           </div>
@@ -217,7 +243,7 @@ export default function DashboardPage() {
             <AreaChart data={revenueData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#c9a96e" stopOpacity={0.2} />
+                  <stop offset="5%" stopColor="#c9a96e" stopOpacity={0.2} />
                   <stop offset="95%" stopColor="#c9a96e" stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -249,20 +275,19 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-1 overflow-y-auto max-h-[300px] pr-1">
               {activityLog.map((item) => {
                 const isStock = item.type === "stock"
-                const isUser  = item.type === "user"
+                const isUser = item.type === "user"
                 return (
                   <div
                     key={item.id + item.type}
                     className={`flex gap-3 p-3 rounded-xl transition ${isStock ? "bg-amber-50" : "hover:bg-[#faf7f4]"}`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      isStock ? "bg-amber-100 text-amber-500"
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${isStock ? "bg-amber-100 text-amber-500"
                       : isUser ? "bg-[#fde8ed] text-[#c97a8f]"
-                      : "bg-[#faf0e6] text-[#c9a96e]"
-                    }`}>
+                        : "bg-[#faf0e6] text-[#c9a96e]"
+                      }`}>
                       {isStock ? <AlertTriangle size={14} />
-                       : isUser ? <UserPlus size={14} />
-                       : <ShoppingCart size={14} />}
+                        : isUser ? <UserPlus size={14} />
+                          : <ShoppingCart size={14} />}
                     </div>
 
                     <div className="flex-1 min-w-0">

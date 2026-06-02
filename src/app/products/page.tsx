@@ -61,6 +61,8 @@ export default function ProductsPage() {
   )
 
   const editSubcategoryOptions = editForm.department ? SUBCATEGORIES[editForm.department] : []
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,11 +70,17 @@ export default function ProductsPage() {
       return
     }
     api
-      .get("/product", config)
-      .then((res) => setProducts(res.data.data || res.data || []))
-      .catch(() => toast.error("Failed to load products"))
+      .get(`/product?page=${currentPage}`, config)
+      .then((res) => {
+        setProducts(res.data.data || [])
+        setTotalPages(res.data.totalPages || 1)
+      })
+      .catch((err) => {
+        console.log("ERROR:", err)
+        toast.error("Failed to load products")
+      })
       .finally(() => setLoading(false))
-  }, [isAuthenticated])
+  }, [isAuthenticated, currentPage])
 
   const handleDelete = async (id: string) => {
     try {
@@ -234,7 +242,12 @@ export default function ProductsPage() {
                     {formatSubcategory(product.subcategory)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">${product.price}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{product.totalStock ?? 0}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {product.variants?.reduce(
+                      (sum, variant) => sum + (variant.stock || 0),
+                      0
+                    ) ?? 0}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <button
@@ -256,6 +269,37 @@ export default function ProductsPage() {
             </tbody>
           </table>
         </div>
+        <div className="flex justify-center items-center gap-3 mt-8">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 border rounded-full disabled:opacity-40"
+          >
+            Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`w-10 h-10 rounded-full border ${currentPage === i + 1
+                  ? "bg-[#0d1b3d] text-white"
+                  : "bg-white text-gray-700"
+                }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 border rounded-full disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+
       </main>
 
       {editProduct && (
